@@ -21,9 +21,9 @@ class FixedWindowLimiter
         $this->limit = $limit;
     }
 
-    public static function create(CarbonInterval $window, int $limit): self
+    public static function create(CarbonInterval $timeWindow, int $limit): self
     {
-        return new static($window, $limit);
+        return new static($timeWindow, $limit);
     }
     
     public function attempt(string $resource): bool
