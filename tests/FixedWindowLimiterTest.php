@@ -85,4 +85,31 @@ class FixedWindowLimiterTest extends TestCase
 
         $this->assertSame(5, $limiter->getUsage('resource'));
     }
+
+    /** @test */
+    public function it_returns_the_real_usage_when_its_over_the_limit()
+    {
+        $limiter = FixedWindowLimiter::create(CarbonInterval::minute(), 5);
+
+        foreach(range(1,10) as $i) {
+            $limiter->attempt('resource');
+        }
+
+        $this->assertSame(10, $limiter->getRealUsage('resource'));
+    }
+
+    /** @test */
+    public function it_can_reset_attempts()
+    {
+        $limiter = FixedWindowLimiter::create(CarbonInterval::second(2), 2);
+
+        $this->assertTrue($limiter->attempt('resource'));
+        $this->assertTrue($limiter->attempt('resource'));
+        $this->assertFalse($limiter->attempt('resource'));
+        $this->assertFalse($limiter->attempt('resource'));
+
+        $limiter->reset('resource');
+
+        $this->assertTrue($limiter->attempt('resource'));
+    }
 }

@@ -62,4 +62,18 @@ class FixedWindowLimiter
     {
         return config('limiter.prefix') . $resource;
     }
+
+    public function getRealUsage(string $resource): int
+    {
+        return (int)$this->getConnection()->get($this->buildKey($resource));
+    }
+
+    public function reset(string $resource)
+    {
+        $key = $this->buildKey($resource);
+
+        $this->getConnection()->set($key, 0);
+
+        $this->getConnection()->expire($key, $this->timeWindow);
+    }
 }
