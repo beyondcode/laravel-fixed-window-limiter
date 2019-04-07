@@ -7,7 +7,9 @@
 
 This package allows you to easily create and validate rate limiting using the fixed window algorithm.
 
-Fixed window
+This package makes use of  Redis' atomic requests.
+
+
 
 ## Installation
 
@@ -19,9 +21,44 @@ composer require beyondcode/laravel-fixed-window-limiter
 
 ## Usage
 
+You can create a new limiter instance by calling the `create` method and pass it a CarbonInterval that represents the window of time, that will be used for the limiter.
+The second argument is the maximum number of requests/attempts that your limiter will accept in that given time frame. 
+
 ``` php
-$skeleton = new BeyondCode\FixedWindowLimiter();
-echo $skeleton->echoPhrase('Hello, BeyondCode!');
+$limiter = FixedWindowLimiter::create(CarbonInterval::second(2), 2);
+```
+
+### Running attempts against your limiter
+
+Once your limiter is created, you can perform attempts against it to see if the call is within the usage limits that you specified.
+Since your limiter can be used for multiple resources, you need to pass the resource that you want to attempt the call for in the `attempt` method call.
+
+```php
+$limiter->attempt('user_1');
+```
+
+### Getting the usage count
+
+When you want to read the number of attempts that were made for a given resource, you may call the `getUsage` method.
+
+**Note:** This method will not return the number of attempts, but only the number of successful attempts. Use the `getRealUsage` method, if you want to see all attempts, including those that were rejected.
+
+```php
+$count = $limiter->getUsage('user_1');
+```
+
+Or as mentioned, to get the real usage of all attempts for the resource:
+
+```php
+$count = $limiter->getRealUsage('user_1');
+```
+
+### Reset the limiter
+
+If you want to reset the attempts for a specific resource, you may call the `reset` method on the limiter instance. This will reset the TTL to the given time frame and re-allow new attempts.
+
+```php
+$limiter->reset('user_1');
 ```
 
 ### Testing
