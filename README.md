@@ -9,7 +9,7 @@ This package allows you to easily create and validate rate limiting using the fi
 
 This package makes use of  Redis' atomic requests.
 
-
+![](https://beyondco.de/github/limiter/limiter.png)
 
 ## Installation
 
