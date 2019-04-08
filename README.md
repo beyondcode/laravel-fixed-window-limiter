@@ -61,6 +61,22 @@ If you want to reset the attempts for a specific resource, you may call the `res
 $limiter->reset('user_1');
 ```
 
+### Additional data
+
+Sometimes you might want to store additional data inside of the resource hash in Redis. You can pass the initial data to the `reset` method.
+
+```php
+$limiter->reset('user_1', [
+    'key' => 'value'
+]);
+```
+
+In order to retrieve the data, you may use the `getAdditionalData` method.
+
+```php
+$value = $limiter->getAdditionalData('user_1', 'key');
+```
+
 ### Testing
 
 ``` bash
