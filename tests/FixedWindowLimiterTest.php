@@ -112,4 +112,16 @@ class FixedWindowLimiterTest extends TestCase
 
         $this->assertTrue($limiter->attempt('resource'));
     }
+
+    /** @test */
+    public function it_can_store_additional_data_when_resetting()
+    {
+        $limiter = FixedWindowLimiter::create(CarbonInterval::second(2), 2);
+
+        $limiter->reset('resource', [
+            'max' => 100
+        ]);
+
+        $this->assertSame('100', $limiter->getAdditionalData('resource', 'max'));
+    }
 }

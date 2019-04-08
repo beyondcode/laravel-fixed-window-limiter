@@ -30,7 +30,7 @@ class FixedWindowLimiter
     {
         $key = $this->buildKey($resource);
 
-        $hits = $this->getConnection()->incr($key);
+        $hits = $this->getConnection()->hincrby($key, 'attempts', 1);
 
         if ($hits === 1) {
             $this->getConnection()->expire($key, $this->timeWindow);
@@ -41,7 +41,7 @@ class FixedWindowLimiter
 
     public function getUsage(string $resource): int
     {
-        $usage = (int)$this->getConnection()->get($this->buildKey($resource));
+        $usage = (int)$this->getConnection()->hget($this->buildKey($resource), 'attempts');
 
         return min($this->limit, $usage);
     }
@@ -65,15 +65,24 @@ class FixedWindowLimiter
 
     public function getRealUsage(string $resource): int
     {
-        return (int)$this->getConnection()->get($this->buildKey($resource));
+        return (int)$this->getConnection()->hget($this->buildKey($resource), 'attempts');
     }
 
-    public function reset(string $resource)
+    public function reset(string $resource, array $additionalData = [])
     {
         $key = $this->buildKey($resource);
 
-        $this->getConnection()->set($key, 0);
+        $this->getConnection()->hset($key, 'attempts', 0);
+
+        foreach ($additionalData as $field => $value) {
+            $this->getConnection()->hset($key, $field, $value);
+        }
 
         $this->getConnection()->expire($key, $this->timeWindow);
+    }
+
+    public function getAdditionalData(string $resource, string $key)
+    {
+        return $this->getConnection()->hget($this->buildKey($resource), $key);
     }
 }
