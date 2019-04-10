@@ -33,6 +33,7 @@ class FixedWindowLimiter
         $hits = $this->getConnection()->hincrby($key, 'attempts', 1);
 
         if ($hits === 1) {
+            $this->getConnection()->hset($key, 'created_at', now()->toDateTimeString());
             $this->getConnection()->expire($key, $this->timeWindow);
         }
 
@@ -73,6 +74,7 @@ class FixedWindowLimiter
         $key = $this->buildKey($resource);
 
         $this->getConnection()->hset($key, 'attempts', 0);
+        $this->getConnection()->hset($key, 'created_at', now()->toDateTimeString());
 
         foreach ($additionalData as $field => $value) {
             $this->getConnection()->hset($key, $field, $value);
