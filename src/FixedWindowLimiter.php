@@ -2,6 +2,7 @@
 
 namespace BeyondCode\FixedWindowLimiter;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Redis\Connections\Connection;
@@ -81,6 +82,19 @@ class FixedWindowLimiter
         }
 
         $this->getConnection()->expire($key, $this->timeWindow);
+    }
+
+    public function getCreationDate(string $resource): ?Carbon
+    {
+        $key = $this->buildKey($resource);
+
+        $creationDate = $this->getConnection()->hget($key, 'created_at');
+
+        if (is_null($creationDate)) {
+            return null;
+        }
+
+        return new Carbon($creationDate);
     }
 
     public function getAdditionalData(string $resource, string $key)

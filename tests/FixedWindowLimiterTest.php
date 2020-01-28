@@ -4,6 +4,7 @@ namespace BeyondCode\FixedWindowLimiter\Tests;
 
 use BeyondCode\FixedWindowLimiter\FixedWindowLimiter;
 use BeyondCode\FixedWindowLimiter\FixedWindowLimiterServiceProvider;
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Orchestra\Testbench\TestCase;
 use Redis;
@@ -23,6 +24,26 @@ class FixedWindowLimiterTest extends TestCase
         return [
             FixedWindowLimiterServiceProvider::class
         ];
+    }
+
+    /** @test */
+    public function it_returns_no_creation_date_if_no_attempts_were_made()
+    {
+        $limiter = FixedWindowLimiter::create(CarbonInterval::second(2), 2);
+
+        $this->assertNull($limiter->getCreationDate('resource'));
+    }
+
+    /** @test */
+    public function it_returns_a_creation_date_if_no_attempts_were_made()
+    {
+        Carbon::setTestNow('2020-01-27 10:00:00');
+
+        $limiter = FixedWindowLimiter::create(CarbonInterval::second(2), 2);
+
+        $limiter->attempt('resource');
+
+        $this->assertSame('2020-01-27 10:00:00', $limiter->getCreationDate('resource')->toDateTimeString());
     }
 
     /** @test */
